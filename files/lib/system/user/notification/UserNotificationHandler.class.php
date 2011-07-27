@@ -30,7 +30,7 @@ class UserNotificationHandler extends SingletonFactory {
 	 */
 	protected function init() {
 		// load cache
-		CacheHandler::getInstance()->addResource('user-notification-object-type-'.PACKAGE_ID, WCF_DIR.'cache/cache.user-notification-object-type-'.PACKAGE_ID.'.php', 'wcf\system\cache\CacheBuilderUserNotificationObjectType');
+		CacheHandler::getInstance()->addResource('user-notification-object-type-'.PACKAGE_ID, WCF_DIR.'cache/cache.user-notification-object-type-'.PACKAGE_ID.'.php', 'wcf\system\cache\builder\CacheBuilderUserNotificationObjectType');
 		$this->availableObjectTypes = CacheHandler::getInstance()->get('user-notification-object-type-'.PACKAGE_ID);
 	}
 	
@@ -50,7 +50,6 @@ class UserNotificationHandler extends SingletonFactory {
 		}
 		
 		// get objects
-		$objectType = $this->availableObjectTypes[$objectType]['object'];
 		$event = $this->availableObjectTypes[$objectType]['events'][$eventName];
 		
 		// save notification
