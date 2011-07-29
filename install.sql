@@ -5,10 +5,8 @@ CREATE TABLE wcf1_user_notification (
 	packageID INT(10) NOT NULL,
 	eventID INT(10) NOT NULL,
 	objectID INT(10) NOT NULL DEFAULT 0,
+	authorID INT(10),
 	time INT(10) NOT NULL DEFAULT 0,
-	shortOutput VARCHAR(255) DEFAULT NULL,
-	mediumOutput TEXT,
-	longOutput TEXT,
 	additionalData TEXT
 );
 
@@ -45,8 +43,15 @@ DROP TABLE IF EXISTS wcf1_user_notification_event_to_user;
 CREATE TABLE wcf1_user_notification_event_to_user (
 	userID INT(10) NOT NULL,
 	eventID INT(10) NOT NULL,
+	UNIQUE KEY (userID, eventID)
+);
+
+DROP TABLE IF EXISTS wcf1_user_notification_event_notification_type;
+CREATE TABLE wcf1_user_notification_event_notification_type (
+	userID INT(10) NOT NULL,
+	eventID INT(10) NOT NULL,
 	notificationTypeID INT(10) NOT NULL,
-	enabled TINYINT(1) NOT NULL DEFAULT 0
+	UNIQUE KEY (userID, eventID, notificationTypeID)
 );
 
 -- objects that create notifications
@@ -75,6 +80,7 @@ CREATE TABLE wcf1_user_notification_type (
 
 ALTER TABLE wcf1_user_notification ADD FOREIGN KEY (packageID) REFERENCES wcf1_package (packageID) ON DELETE CASCADE;
 ALTER TABLE wcf1_user_notification ADD FOREIGN KEY (eventID) REFERENCES wcf1_user_notification_event (eventID) ON DELETE CASCADE;
+ALTER TABLE wcf1_user_notification ADD FOREIGN KEY (authorID) REFERENCES wcf1_user (userID) ON DELETE SET NULL;
 
 ALTER TABLE wcf1_user_notification_to_user ADD FOREIGN KEY (notificationID) REFERENCES wcf1_user_notification (notificationID) ON DELETE CASCADE;
 ALTER TABLE wcf1_user_notification_to_user ADD FOREIGN KEY (userID) REFERENCES wcf1_user (userID) ON DELETE CASCADE;
@@ -85,7 +91,10 @@ ALTER TABLE wcf1_user_notification_event ADD FOREIGN KEY (defaultNotificationTyp
 
 ALTER TABLE wcf1_user_notification_event_to_user ADD FOREIGN KEY (userID) REFERENCES wcf1_user (userID) ON DELETE CASCADE;
 ALTER TABLE wcf1_user_notification_event_to_user ADD FOREIGN KEY (eventID) REFERENCES wcf1_user_notification_event (eventID) ON DELETE CASCADE;
-ALTER TABLE wcf1_user_notification_event_to_user ADD FOREIGN KEY (notificationTypeID) REFERENCES wcf1_user_notification_type (notificationTypeID) ON DELETE CASCADE;
+
+ALTER TABLE wcf1_user_notification_event_notification_type ADD FOREIGN KEY (userID) REFERENCES wcf1_user (userID) ON DELETE CASCADE;
+ALTER TABLE wcf1_user_notification_event_notification_type ADD FOREIGN KEY (eventID) REFERENCES wcf1_user_notification_event (eventID) ON DELETE CASCADE;
+ALTER TABLE wcf1_user_notification_event_notification_type ADD FOREIGN KEY (notificationTypeID) REFERENCES wcf1_user_notification_type (notificationTypeID) ON DELETE CASCADE;
 
 ALTER TABLE wcf1_user_notification_object_type ADD FOREIGN KEY (packageID) REFERENCES wcf1_package (packageID) ON DELETE CASCADE;
 

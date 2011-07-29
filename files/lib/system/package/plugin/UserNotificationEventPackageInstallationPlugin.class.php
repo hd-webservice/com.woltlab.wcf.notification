@@ -64,7 +64,7 @@ class UserNotificationEventPackageInstallationPlugin extends AbstractXMLPackageI
 		$objectTypeID = $row['objectTypeID'];
 		
 		// get notification type id
-		$defaultNotificationTypeID = 0;
+		$defaultNotificationTypeID = null;
 		if (!empty($data['elements']['defaultnotificationtype'])) {
 			$sql = "SELECT		notification_type.notificationTypeID
 				FROM		wcf".WCF_N."_package_dependency package_dependency,

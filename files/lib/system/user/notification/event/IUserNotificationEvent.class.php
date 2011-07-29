@@ -64,4 +64,12 @@ interface IUserNotificationEvent extends IDatabaseObjectProcessor {
 	 * @return	boolean
 	 */
 	public function supportsNotificationType(IUserNotificationType $notificationType);
+	
+	/**
+	 * Sets the object for the event.
+	 *
+	 * @param	wcf\system\user\notification\object\IUserNotificationObject	$object
+	 * @param	array<mixed>							$additionalData
+	 */
+	public function setObject(IUserNotificationObject $object, array $additionalData = array());
 }

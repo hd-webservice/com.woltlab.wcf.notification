@@ -7,13 +7,13 @@ use wcf\system\database\util\PreparedStatementConditionBuilder;
 use wcf\system\WCF;
 
 /**
- * Decorates the user object to provide special functions for handling recipients of user notifications.
+ * Extends the user list to provide special functions for handling recipients of user notifications.
  * 
  * @author	Marcel Werk
  * @copyright	2001-2011 WoltLab GmbH
  * @license	GNU Lesser General Public License <http://opensource.org/licenses/lgpl-license.php>
  * @package	com.woltlab.wcf.notification
- * @subpackage	data.user.notification.user
+ * @subpackage	data.user.notification.recipient
  * @category 	Community Framework
  */
 class UserNotificationRecipientList extends UserList {

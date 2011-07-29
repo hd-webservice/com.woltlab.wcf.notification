@@ -1,6 +1,7 @@
 <?php
 namespace wcf\system\user\notification\event;
 use wcf\data\DatabaseObjectDecorator;
+use wcf\system\user\notification\type\IUserNotificationType;
 
 /**
  * Provides default a implementation for user notification events.
@@ -17,4 +18,31 @@ abstract class AbstractUserNotificationEvent extends DatabaseObjectDecorator imp
 	 * @see wcf\data\DatabaseObjectDecorator::$baseClass
 	 */
 	protected static $baseClass = 'wcf\data\user\notification\event\UserNotificationEvent';
+	
+	/**
+	 * user notification object
+	 * @var wcf\system\user\notification\object\IUserNotificationObject
+	 */
+	protected $object = null;
+
+	/**
+	 * additional data for this event
+	 * @var array<mixed>
+	 */
+	protected $additionalData = array();
+	
+	/**
+	 * @see wcf\system\user\notification\event\IUserNotificationEvent::setObject()
+	 */
+	public function setObject(IUserNotificationObject $object, array $additionalData = array()) {
+		$this->object = $object;
+		$this->additionalData = $additionalData;
+	}
+	
+	/**
+	 * @see wcf\system\user\notification\event\IUserNotificationEvent::supportsNotificationType()
+	 */
+	public function supportsNotificationType(IUserNotificationType $notificationType) {
+		return true;
+	}
 }
