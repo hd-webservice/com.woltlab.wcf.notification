@@ -2,6 +2,7 @@
 namespace wcf\system\user\notification\event;
 use wcf\data\IDatabaseObjectProcessor;
 use wcf\system\user\notification\type\IUserNotificationType;
+use wcf\system\user\notification\object\IUserNotificationObject;
 
 /**
  * This interface should be implemented by every event which is fired by the notification system.

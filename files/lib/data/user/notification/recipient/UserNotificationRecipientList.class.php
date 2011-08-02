@@ -33,10 +33,9 @@ class UserNotificationRecipientList extends UserList {
 		$notificationTypes = array();
 		$conditionBuilder = new PreparedStatementConditionBuilder();
 		$conditionBuilder->add('event_to_user.userID IN (?)', array($this->objectIDs));
-		$conditionBuilder->add('event_to_user.enabled = ?', array(1));
 		
 		$sql = "SELECT		event_to_user.eventID, event_to_user.userID, notification_type.*
-			FROM		wcf".WCF_N."_user_notification_event_to_user event_to_user
+			FROM		wcf".WCF_N."_user_notification_event_notification_type event_to_user
 			LEFT JOIN	wcf".WCF_N."_user_notification_type notification_type
 			ON		(notification_type.notificationTypeID = event_to_user.notificationTypeID)
 			".$conditionBuilder->__toString();
