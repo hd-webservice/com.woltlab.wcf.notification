@@ -195,9 +195,7 @@ class UserNotificationHandler extends SingletonFactory {
 		UserNotificationEditor::deleteAll($notificationIDs);
 		
 		// reset recipient storage
-		foreach ($uniqueRecipientIDs as $recipientID) {
-			StorageHandler::getInstance()->reset($recipientID, 'userNotificationCount');
-		}
+		StorageHandler::getInstance()->reset($uniqueRecipientIDs, 'userNotificationCount');
 	}
 		
 	/**
