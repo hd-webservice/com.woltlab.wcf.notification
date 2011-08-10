@@ -1,6 +1,7 @@
 <?php
 namespace wcf\system\user\notification;
 use wcf\data\user\notification\event\UserNotificationEvent;
+use wcf\data\user\notification\event\UserNotificationEventList;
 use wcf\data\user\notification\event\recipient\UserNotificationEventRecipientList;
 use wcf\data\user\notification\UserNotificationAction;
 use wcf\data\user\notification\UserNotificationEditor;
@@ -195,7 +196,9 @@ class UserNotificationHandler extends SingletonFactory {
 		UserNotificationEditor::deleteAll($notificationIDs);
 		
 		// reset recipient storage
-		StorageHandler::getInstance()->reset($uniqueRecipientIDs, 'userNotificationCount');
+		foreach ($uniqueRecipientIDs as $recipientID) {
+			StorageHandler::getInstance()->reset($recipientID, 'userNotificationCount');
+		}
 	}
 		
 	/**
@@ -241,5 +244,108 @@ class UserNotificationHandler extends SingletonFactory {
 		}
 		
 		return $this->notificationCount;
+	}
+	
+	/**
+	 * Returns a limited list of outstanding notifications.
+	 * 
+	 * @param	integer		$limit
+	 * @param	integer		$offset
+	 * @return	array<array>
+	 */	
+	public function getNotifications($limit = 10, $offset = 0) {
+		// build enormous query
+		$conditions = new PreparedStatementConditionBuilder();
+		$conditions->add("notification_to_user.userID = ?", array(WCF::getUser()->userID));
+		$conditions->add("notification_to_user.confirmed = ?", array(0));
+		$conditions->add("notification.notificationID = notification_to_user.notificationID");
+		$conditions->add("notification.packageID IN (?)", array(PackageDependencyHandler::getDependencies()));
+		
+		$sql = "SELECT		notification_to_user.notificationID, notification_event.eventID,
+					notification_object_type.objectType, notification.objectID,
+					notification.additionalData
+			FROM		wcf".WCF_N."_user_notification_to_user notification_to_user,
+					wcf".WCF_N."_user_notification notification
+			LEFT JOIN	wcf".WCF_N."_user_notification_event notification_event
+			ON		(notification_event.eventID = notification.eventID)
+			LEFT JOIN	wcf".WCF_N."_user_notification_object_type notification_object_type
+			ON		(notification_object_type.objectTypeID = notification_event.objectTypeID)
+			".$conditions;
+		$statement = WCF::getDB()->prepareStatement($sql, $limit, $offset);
+		$statement->execute($conditions->getParameters());
+		
+		$events = array();
+		$objectTypes = array();
+		$eventIDs = array();
+		while ($row = $statement->fetchArray()) {
+			$events[] = $row;
+			
+			// cache object types
+			if (!isset($objectTypes[$row['objectType']])) {
+				$objectTypes[$row['objectType']] = array(
+					'objectType' => $this->availableObjectTypes[$row['objectType']]['object'],
+					'objectIDs' => array(),
+					'objects' => array()
+				);
+			}
+			
+			$objectTypes[$row['objectType']]['objectIDs'][] = $row['objectID'];
+			$eventIDs[] = $row['eventID'];
+		}
+		
+		// return an empty set if no notifications exist
+		if (!count($events)) {
+			return array(
+				'count' => 0,
+				'notifications' => array()
+			);
+		}
+		
+		// load objects associated with each object type
+		foreach ($objectTypes as $objectType => $objectData) {
+			if (count($objectData['objectIDs']) > 1) {
+				$objectTypes[$objectType]['objects'] = $objectData['objectType']->getObjectsByIDs($objectData['objectIDs']);
+			}
+			else {
+				$objectTypes[$objectType]['objects'][] = $objectData['objectType']->getObjectByID($objectData['objectIDs'][0]);
+			}
+			
+			// rebuild array to use objectIDs as key
+			$tmp = array();
+			foreach ($objectTypes[$objectType]['objects'] as $object) {
+				$tmp[$object->{$object->getDatabaseTableIndexName()}] = $object;
+			}
+			$objectTypes[$objectType]['objects'] = $tmp;
+		}
+		
+		// load required events
+		$eventList = new UserNotificationEventList();
+		$eventList->getConditionBuilder()->add("user_notification_event.eventID IN (?)", array($eventIDs));
+		$eventList->sqlLimit = 0;
+		$eventList->readObjects();
+		
+		$eventObjects = array();
+		foreach ($eventList->getObjects() as $event) {
+			$eventObjects[$event->eventID] = $event;
+		}
+		
+		// build notification data
+		$notifications = array();
+		foreach ($events as $event) {
+			$className = $eventObjects[$event['eventID']]->className;
+			$class = new $className($eventObjects[$event['eventID']]);
+			$class->setObject($objectTypes[$event['objectType']]['objects'][$event['objectID']], unserialize($event['additionalData']));
+			
+			$notifications[] = array(
+				'notificationID' => $event['notificationID'],
+				'label' => $class->getShortOutput(),
+				'message' => $class->getOutput()
+			);
+		}
+		
+		return array(
+			'count' => count($notifications),
+			'notifications' => $notifications
+		);
 	}
 }
