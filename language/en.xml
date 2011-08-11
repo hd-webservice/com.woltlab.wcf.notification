@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<language xmlns="http://www.woltlab.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/maelstrom/language.xsd" languagecode="en">
+	<category name="wcf.user.notification">
+		<item name="wcf.user.notification.count"><![CDATA[if (data.returnValues.count == 0) { "No notifications" } else if (data.returnValues.count == 1) { "One notification" } else { data.returnValues.count + " notifications" }]]></item>
+		<item name="wcf.user.notification.noNotifications"><![CDATA[No new notifications]]></item>
+	</category>
+</language>

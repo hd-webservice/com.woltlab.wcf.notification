@@ -270,12 +270,18 @@ WCF.Notification.Action.prototype = {
 		this._targetElement = targetElement;
 		
 		// send ajax request
+		var $parameters = {};
+		$parameters[this._targetElement.data('objectID')] = this._notificationID;
+		
 		new WCF.Action.Proxy({
 			autoSend: true,
 			data: {
 				actionName: this._targetElement.data('action'),
-				className: '', this._targetElement.data('className'),
-				objectIDs: [ this._targetElement.data('objectID') ]
+				className: this._targetElement.data('className'),
+				objectIDs: [ this._targetElement.data('objectID') ],
+				parameters: {
+					notificationID: $parameters
+				}
 			},
 			init: $.proxy(this._showLoadingOverlay, this),
 			success: $.proxy(this._hideLoadingOverlay, this)
@@ -295,7 +301,7 @@ WCF.Notification.Action.prototype = {
 				// remove complete list
 				var $listItems = this._itemContainer.find('li');
 				if (!$listItems.length) {
-					this._itemContainer.html('<p>Keine neuen Benachrichtigungen.</p>');
+					this._itemContainer.html('<p>' + WCF.Language.get('wcf.user.notification.noNotifications') + '</p>');
 				}
 				
 				// show list
@@ -329,7 +335,7 @@ WCF.Notification.Action.prototype = {
 	 */
 	_hideLoadingOverlay: function(data, textStatus, jqXHR) {
 		this._loading.hide();
-		this._overlay._showList($.proxy(this._removeItem, this));
+		this._removeItem();
 	}
 };
 
@@ -382,7 +388,11 @@ WCF.Notification.Loader.prototype = {
 	 * @param	jQuery		jqXHR
 	 */
 	_success: function(data, textStatus, jqXHR) {
+		$('#userNotifications').text(eval(WCF.Language.get('wcf.user.notification.count')));
+		
 		if (!data.returnValues.count) {
+			this._container.find('div.scrollableItems div:eq(0)').html('<p>' + WCF.Language.get('wcf.user.notification.noNotifications') + '</p>');
+			
 			return;
 		}
 		

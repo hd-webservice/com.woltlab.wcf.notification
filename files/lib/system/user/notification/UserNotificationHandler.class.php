@@ -348,4 +348,25 @@ class UserNotificationHandler extends SingletonFactory {
 			'notifications' => $notifications
 		);
 	}
+	
+	/**
+	 * Marks a notification as confirmed.
+	 * 
+	 * @param	integer		$notificationID
+	 * @param	integer		$confirmationTime
+	 */
+	public function markAsConfirmed($notificationID, $confirmationTime = TIME_NOW) {
+		$sql = "UPDATE	wcf".WCF_N."_user_notification_to_user
+			SET	confirmed = ?,
+				confirmationTime = ?
+			WHERE	notificationID = ?
+				AND userID = ?";
+		$statement = WCF::getDB()->prepareStatement($sql);
+		$statement->execute(array(
+			1,
+			$confirmationTime,
+			$notificationID,
+			WCF::getUser()->userID
+		));
+	}
 }
