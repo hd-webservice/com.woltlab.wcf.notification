@@ -10,7 +10,7 @@ use wcf\system\cache\CacheHandler;
 use wcf\system\database\util\PreparedStatementConditionBuilder;
 use wcf\system\exception\SystemException;
 use wcf\system\package\PackageDependencyHandler;
-use wcf\system\storage\StorageHandler;
+use wcf\system\user\storage\UserStorageHandler;
 use wcf\system\user\notification\object\IUserNotificationObject;
 use wcf\system\SingletonFactory;
 use wcf\system\WCF;
@@ -197,7 +197,7 @@ class UserNotificationHandler extends SingletonFactory {
 		
 		// reset recipient storage
 		foreach ($uniqueRecipientIDs as $recipientID) {
-			StorageHandler::getInstance()->reset($recipientID, 'userNotificationCount');
+			UserStorageHandler::getInstance()->reset($recipientID, 'userNotificationCount');
 		}
 	}
 		
@@ -212,10 +212,10 @@ class UserNotificationHandler extends SingletonFactory {
 		
 			if (WCF::getUser()->userID) {
 				// load storage data
-				StorageHandler::getInstance()->loadStorage(array(WCF::getUser()->userID));
+				UserStorageHandler::getInstance()->loadStorage(array(WCF::getUser()->userID));
 					
 				// get ids
-				$data = StorageHandler::getInstance()->getStorage(array(WCF::getUser()->userID), 'userNotificationCount');
+				$data = UserStorageHandler::getInstance()->getStorage(array(WCF::getUser()->userID), 'userNotificationCount');
 				
 				// cache does not exist or is outdated
 				if ($data[WCF::getUser()->userID] === null) {
@@ -235,7 +235,7 @@ class UserNotificationHandler extends SingletonFactory {
 					$this->notificationCount = $row['count'];
 					
 					// update storage data
-					StorageHandler::getInstance()->update(WCF::getUser()->userID, 'userNotificationCount', serialize($this->notificationCount), 1);
+					UserStorageHandler::getInstance()->update(WCF::getUser()->userID, 'userNotificationCount', serialize($this->notificationCount), 1);
 				}
 				else {
 					$this->notificationCount = unserialize($data[WCF::getUser()->userID]);
