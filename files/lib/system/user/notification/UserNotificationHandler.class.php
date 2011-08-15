@@ -3,6 +3,8 @@ namespace wcf\system\user\notification;
 use wcf\data\user\notification\event\UserNotificationEvent;
 use wcf\data\user\notification\event\UserNotificationEventList;
 use wcf\data\user\notification\event\recipient\UserNotificationEventRecipientList;
+use wcf\data\user\notification\recipient\UserNotificationRecipientList;
+use wcf\data\user\notification\UserNotification;
 use wcf\data\user\notification\UserNotificationAction;
 use wcf\data\user\notification\UserNotificationEditor;
 use wcf\data\user\notification\UserNotificationList;
@@ -43,12 +45,8 @@ class UserNotificationHandler extends SingletonFactory {
 	 */
 	protected function init() {
 		// load cache
-		$cacheName = 'user-notification-object-type-'.PACKAGE_ID;
-		CacheHandler::getInstance()->addResource(
-			$cacheName,
-			WCF_DIR.'cache/cache.'.$cacheName.'.php',
-			'wcf\system\cache\builder\CacheBuilderUserNotificationObjectType');
-		$this->availableObjectTypes = CacheHandler::getInstance()->get($cacheName);
+		CacheHandler::getInstance()->addResource('user-notification-object-type-'.PACKAGE_ID, WCF_DIR.'cache/cache.user-notification-object-type-'.PACKAGE_ID.'.php', 'wcf\system\cache\builder\CacheBuilderUserNotificationObjectType');
+		$this->availableObjectTypes = CacheHandler::getInstance()->get('user-notification-object-type-'.PACKAGE_ID);
 	}
 	
 	/**
@@ -70,7 +68,7 @@ class UserNotificationHandler extends SingletonFactory {
 		$objectTypeObject = $this->availableObjectTypes[$objectType]['object'];
 		$event = $this->availableObjectTypes[$objectType]['events'][$eventName];
 		// set object data
-		$event->setObject($notificationObject, $additionalData);
+		$event->setObject(new UserNotification(null, array()), $notificationObject, $additionalData);
 		
 		// get recipients
 		$recipientList = new UserNotificationEventRecipientList();
@@ -83,7 +81,7 @@ class UserNotificationHandler extends SingletonFactory {
 				'packageID' => $objectTypeObject->packageID,
 				'eventID' => $event->eventID,
 				'objectID' => $notificationObject->getObjectID(),
-				'authorID' => $notificationObject->getAuthorID(),
+				'authorID' => $event->getAuthorID(),
 				'time' => TIME_NOW,
 				'additionalData' => serialize($additionalData),
 				'recipientIDs' => $recipientList->getObjectIDs()
@@ -109,7 +107,7 @@ class UserNotificationHandler extends SingletonFactory {
 	 * @param	string								$objectType
 	 * @param	wcf\system\user\notification\object\IUserNotificationObject	$notificationObject
 	 */
-	public function revokeEvent(array $eventName, $objectType, IUserNotificationObject $notificationObject) {
+	public function revokeEvent($eventName, $objectType, IUserNotificationObject $notificationObject) {
 		$this->revokeEvents(array($eventName), $objectType, array($notificationObject));
 	}
 	
@@ -152,10 +150,10 @@ class UserNotificationHandler extends SingletonFactory {
 		$notificationList->getConditionBuilder()->add('user_notification.packageID = ?', array($objectTypeObject->packageID));
 		$notificationList->sqlSelects = 'user_notification_event.eventName';
 		$notificationList->sqlJoins = " LEFT JOIN wcf".WCF_N."_user_notification_event user_notification_event ON (user_notification_event.eventID = user_notification.eventID) ";
-		$notificationList->readObjectIDs();
-		$notificationList->readObjectID();
+		$notificationList->readObjects();
+		
 		$notifications = $notificationList->getObjects();
-		$notificationIDs = $notificationList->getObjectIDs();
+		$notificationIDs = array_keys($notifications);
 		
 		// get recipient ids
 		$recipientIDs = $uniqueRecipientIDs = array();
@@ -278,9 +276,7 @@ class UserNotificationHandler extends SingletonFactory {
 		$statement = WCF::getDB()->prepareStatement($sql, $limit, $offset);
 		$statement->execute($conditions->getParameters());
 		
-		$events = array();
-		$objectTypes = array();
-		$eventIDs = array();
+		$events = $objectTypes = $eventIDs = $notificationIDs = array();
 		while ($row = $statement->fetchArray()) {
 			$events[] = $row;
 			
@@ -295,6 +291,7 @@ class UserNotificationHandler extends SingletonFactory {
 			
 			$objectTypes[$row['objectType']]['objectIDs'][] = $row['objectID'];
 			$eventIDs[] = $row['eventID'];
+			$notificationIDs[] = $row['notificationID'];
 		}
 		
 		// return an empty set if no notifications exist
@@ -311,15 +308,8 @@ class UserNotificationHandler extends SingletonFactory {
 				$objectTypes[$objectType]['objects'] = $objectData['objectType']->getObjectsByIDs($objectData['objectIDs']);
 			}
 			else {
-				$objectTypes[$objectType]['objects'][] = $objectData['objectType']->getObjectByID($objectData['objectIDs'][0]);
+				$objectTypes[$objectType]['objects'] = $objectData['objectType']->getObjectByID($objectData['objectIDs'][0]);
 			}
-			
-			// rebuild array to use objectIDs as key
-			$tmp = array();
-			foreach ($objectTypes[$objectType]['objects'] as $object) {
-				$tmp[$object->{$object->getDatabaseTableIndexName()}] = $object;
-			}
-			$objectTypes[$objectType]['objects'] = $tmp;
 		}
 		
 		// load required events
@@ -327,18 +317,25 @@ class UserNotificationHandler extends SingletonFactory {
 		$eventList->getConditionBuilder()->add("user_notification_event.eventID IN (?)", array($eventIDs));
 		$eventList->sqlLimit = 0;
 		$eventList->readObjects();
+		$eventObjects = $eventList->getObjects();
 		
-		$eventObjects = array();
-		foreach ($eventList->getObjects() as $event) {
-			$eventObjects[$event->eventID] = $event;
-		}
+		// load notification objects
+		$notificationList = new UserNotificationList();
+		$notificationList->getConditionBuilder()->add("user_notification.notificationID IN (?)", array($notificationIDs));
+		$notificationList->sqlLimit = 0;
+		$notificationList->readObjects();
+		$notificationObjects = $notificationList->getObjects();
 		
 		// build notification data
 		$notifications = array();
 		foreach ($events as $event) {
 			$className = $eventObjects[$event['eventID']]->className;
 			$class = new $className($eventObjects[$event['eventID']]);
-			$class->setObject($objectTypes[$event['objectType']]['objects'][$event['objectID']], unserialize($event['additionalData']));
+			$class->setObject(
+				$notificationObjects[$event['notificationID']],
+				$objectTypes[$event['objectType']]['objects'][$event['objectID']],
+				unserialize($event['additionalData'])
+			);
 			
 			$notifications[] = array(
 				'notificationID' => $event['notificationID'],

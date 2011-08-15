@@ -1,5 +1,6 @@
 <?php
 namespace wcf\system\user\notification\event;
+use wcf\data\user\notification\UserNotification;
 use wcf\data\DatabaseObjectDecorator;
 use wcf\system\user\notification\type\IUserNotificationType;
 use wcf\system\user\notification\object\IUserNotificationObject;
@@ -21,11 +22,17 @@ abstract class AbstractUserNotificationEvent extends DatabaseObjectDecorator imp
 	protected static $baseClass = 'wcf\data\user\notification\event\UserNotificationEvent';
 	
 	/**
+	 * user notification
+	 * @var	wcf\data\user\notification\UserNotification
+	 */	
+	protected $notification = null;
+	
+	/**
 	 * user notification object
 	 * @var wcf\system\user\notification\object\IUserNotificationObject
 	 */
 	protected $userNotificationObject = null;
-
+	
 	/**
 	 * additional data for this event
 	 * @var array<mixed>
@@ -35,7 +42,8 @@ abstract class AbstractUserNotificationEvent extends DatabaseObjectDecorator imp
 	/**
 	 * @see wcf\system\user\notification\event\IUserNotificationEvent::setObject()
 	 */
-	public function setObject(IUserNotificationObject $object, array $additionalData = array()) {
+	public function setObject(UserNotification $notification, IUserNotificationObject $object, array $additionalData = array()) {
+		$this->notification = $notification;
 		$this->userNotificationObject = $object;
 		$this->additionalData = $additionalData;
 	}
@@ -45,5 +53,12 @@ abstract class AbstractUserNotificationEvent extends DatabaseObjectDecorator imp
 	 */
 	public function supportsNotificationType(IUserNotificationType $notificationType) {
 		return true;
+	}
+	
+	/**
+	 * @see	wcf\system\user\notification\event\IUserNotificationEvent::getAuthorID()
+	 */
+	public function getAuthorID() {
+		return $this->userNotificationObject->getAuthorID();
 	}
 }

@@ -1,5 +1,6 @@
 <?php
 namespace wcf\system\user\notification\event;
+use wcf\data\user\notification\UserNotification;
 use wcf\data\IDatabaseObjectProcessor;
 use wcf\system\user\notification\type\IUserNotificationType;
 use wcf\system\user\notification\object\IUserNotificationObject;
@@ -57,6 +58,13 @@ interface IUserNotificationEvent extends IDatabaseObjectProcessor {
 	 * @return	string
 	 */
 	public function getDescription();
+	
+	/**
+	 * Returns the author id for this notification event.
+	 * 
+	 * @return	integer
+	 */
+	public function getAuthorID();
 
 	/**
 	 * Returns true if this event supports the given notification type.
@@ -69,8 +77,9 @@ interface IUserNotificationEvent extends IDatabaseObjectProcessor {
 	/**
 	 * Sets the object for the event.
 	 *
+	 * @param	wcf\data\user\notification\UserNotification			$notification
 	 * @param	wcf\system\user\notification\object\IUserNotificationObject	$object
 	 * @param	array<mixed>							$additionalData
 	 */
-	public function setObject(IUserNotificationObject $object, array $additionalData = array());
+	public function setObject(UserNotification $notification, IUserNotificationObject $object, array $additionalData = array());
 }
