@@ -2,7 +2,6 @@
 namespace wcf\system\cache\builder;
 use wcf\data\user\notification\event\UserNotificationEvent;
 use wcf\data\user\notification\object\type\UserNotificationObjectType;
-use wcf\system\cache\ICacheBuilder;
 use wcf\system\WCF;
 
 /**
@@ -15,7 +14,7 @@ use wcf\system\WCF;
  * @subpackage	system.cache.builder
  * @category 	Community Framework
  */
-class CacheBuilderUserNotificationObjectType implements ICacheBuilder {
+class UserNotificationObjectTypeCacheBuilder implements ICacheBuilder {
 	/**
 	 * @see wcf\system\cache\ICacheBuilder::getData()
 	 */
@@ -27,7 +26,6 @@ class CacheBuilderUserNotificationObjectType implements ICacheBuilder {
 		$packageID = array_pop($tmp);
 		
 		// get object types
-		$typeIDArray = array();
 		$sql = "SELECT		object_type.*
 			FROM		wcf".WCF_N."_user_notification_object_type object_type,
 					wcf".WCF_N."_package_dependency package_dependency
