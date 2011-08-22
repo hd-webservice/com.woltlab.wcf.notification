@@ -23,6 +23,12 @@ interface IUserNotificationEvent extends IDatabaseObjectProcessor {
 	 * @return	string
 	 */
 	public function getMessage(IUserNotificationType $notificationType);
+	
+	/**
+	 * Returns a list of actions for this notification event.
+	 * @return	array<array>
+	 */
+	public function getActions();
 
 	/**
 	 * Returns the short output for this notification event.
@@ -30,20 +36,20 @@ interface IUserNotificationEvent extends IDatabaseObjectProcessor {
 	 * @return	string
 	 */
 	public function getShortOutput();
-
-	/**
-	 * Returns the medium output for this notification event.
-	 *
-	 * @return	string
-	 */
-	public function getMediumOutput();
-
+	
 	/**
 	 * Returns the full output for this notification event.
 	 *
 	 * @return	string
 	 */
 	public function getOutput();
+	
+	/**
+	 * Returns rendered HTML for this notification event.
+	 * 
+	 * @return	string
+	 */	
+	public function getRenderedOutput();
 
 	/**
 	 * Returns the human-readable title of this event.

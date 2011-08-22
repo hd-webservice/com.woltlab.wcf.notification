@@ -40,6 +40,13 @@ abstract class AbstractUserNotificationEvent extends DatabaseObjectDecorator imp
 	protected $additionalData = array();
 	
 	/**
+	 * @see	wcf\system\user\notification\event\IUserNotificationEvent::getActions()
+	 */	
+	public function getActions() {
+		return array();
+	}
+	
+	/**
 	 * @see wcf\system\user\notification\event\IUserNotificationEvent::setObject()
 	 */
 	public function setObject(UserNotification $notification, IUserNotificationObject $object, array $additionalData = array()) {
