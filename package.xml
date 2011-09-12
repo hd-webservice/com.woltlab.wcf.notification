@@ -18,8 +18,8 @@
 	</requiredpackages>
 
 	<instructions type="install">
-		<instruction type="packageinstallationplugins">pip.xml</instruction>
-		<instruction type="files">files.tar</instruction>
+		<instruction type="packageinstallationplugin">pip.xml</instruction>
+		<instruction type="file">files.tar</instruction>
 		<instruction type="sql">install.sql</instruction>
 		<instruction type="userNotificationType">userNotificationType.xml</instruction>
 		<instruction type="coreobject">coreobject.xml</instruction>
