@@ -155,12 +155,18 @@ class UserNotificationHandler extends SingletonFactory {
 		$notifications = $notificationList->getObjects();
 		$notificationIDs = array_keys($notifications);
 		
+		// break if no notifications are available
+		if (!count($notificationIDs)) {
+			return;
+		}
+		
 		// get recipient ids
 		$recipientIDs = $uniqueRecipientIDs = array();
 		$conditionBuilder = new PreparedStatementConditionBuilder();
 		$conditionBuilder->add('user_notification_to_user.notificationID IN (?)', array($notificationIDs));
 		$sql = "SELECT	user_notification_to_user.*
-			FROM	wcf".WCF_N."_user_notification_to_user user_notification_to_user";
+			FROM	wcf".WCF_N."_user_notification_to_user user_notification_to_user
+			".$conditionBuilder;
 		$statement = WCF::getDB()->prepareStatement($sql);
 		$statement->execute($conditionBuilder->getParameters());
 		while ($row = $statement->fetchArray()) {
