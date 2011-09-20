@@ -376,4 +376,64 @@ class UserNotificationHandler extends SingletonFactory {
 			WCF::getUser()->userID
 		));
 	}
+	
+	/**
+	 * Returns event id for given object type and event, returns NULL on failure.
+	 * 
+	 * @param	string		$objectType
+	 * @param	string		$eventName
+	 * @return	integer
+	 */
+	public function getEventID($objectType, $eventName) {
+		$conditions = new PreparedStatementConditionBuilder();
+		$conditions->add("object_type.objectTypeID = event.objectTypeID", array());
+		$conditions->add("object_type.objectType = ?", array($objectType));
+		$conditions->add("event.eventName = ?", array($eventName));
+		$conditions->add("event.packageID IN (?)", array(PackageDependencyHandler::getDependencies()));
+		
+		$sql = "SELECT	event.eventID
+			FROM	wcf".WCF_N."_user_notification_event event,
+				wcf".WCF_N."_user_notification_object_type object_type
+			".$conditions;
+		$statement = WCF::getDB()->prepareStatement($sql);
+		$statement->execute($conditions->getParameters());
+		$row = $statement->fetchArray();
+		
+		if (!$row) return null;
+		
+		return $row['eventID'];
+	}
+	
+	/**
+	 * Retrieves a notification id.
+	 * 
+	 * @param	integer		$eventID
+	 * @param	integer		$objectID
+	 * @param	integer		$authorID
+	 * @param	integer		$time
+	 * @return	integer
+	 */
+	public function getNotificationID($eventID, $objectID, $authorID = null, $time = null) {
+		if ($authorID === null && $time === null) {
+			throw new SystemException("authorID and time cannot be omitted at once.");
+		}
+		
+		$conditions = new PreparedStatementConditionBuilder();
+		$conditions->add("eventID = ?", array($eventID));
+		$conditions->add("objectID = ?", array($objectID));
+		$conditions->add("packageID IN (?)", array(PackageDependencyHandler::getDependencies()));
+		if ($authorID !== null) $conditions->add("authorID = ?", array($authorID));
+		if ($time !== null) $conditions->add("time = ?", array($time));
+		
+		$sql = "SELECT	notificationID
+			FROM	wcf".WCF_N."_user_notification
+			".$conditions;
+		$statement = WCF::getDB()->prepareStatement($sql);
+		$statement->execute($conditions->getParameters());
+		
+		$notifications = array();
+		$row = $statement->fetchArray();
+		
+		return ($row === false) ? null : $row['notificationID'];
+	}
 }
