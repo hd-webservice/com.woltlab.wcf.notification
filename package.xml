@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package name="com.woltlab.wcf.notification" xmlns="http://www.woltlab.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com/XSD/package.xsd">
+<package name="com.woltlab.wcf.notification" xmlns="http://www.woltlab.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/maelstrom/package.xsd">
 	<packageinformation>
 		<packagename>User Notification System</packagename>
 		<packagedescription>Provides functions to deliver notification messages</packagedescription>		
@@ -7,7 +7,7 @@
 		<date>2010-08-22</date>
 		<isunique>1</isunique>
 	</packageinformation>
-
+	
 	<authorinformation>
 		<author>WoltLab GmbH, Oliver Kliebisch and Tim Düsterhus</author>
 		<authorurl>http://www.woltlab.com</authorurl>
@@ -16,12 +16,12 @@
 	<requiredpackages>
 		<requiredpackage minversion="2.0.0 Alpha 1">com.woltlab.wcf</requiredpackage>
 	</requiredpackages>
-
+	
 	<instructions type="install">
-		<instruction type="packageinstallationplugin">pip.xml</instruction>
+		<instruction type="packageInstallationPlugin">pip.xml</instruction>
 		<instruction type="file">files.tar</instruction>
 		<instruction type="sql">install.sql</instruction>
 		<instruction type="userNotificationType">userNotificationType.xml</instruction>
-		<instruction type="coreobject">coreobject.xml</instruction>
+		<instruction type="coreObject">coreObject.xml</instruction>
 	</instructions>
 </package>
