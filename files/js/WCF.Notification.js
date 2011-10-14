@@ -54,6 +54,18 @@ WCF.Notification.Overlay.prototype = {
 	 * @var	jQuery
 	 */
 	_container: null,
+
+	/**
+	 * notification list
+	 * @var	jQuery
+	 */
+	_listContainer: null,
+
+	/**
+	 * notification message container
+	 * @var	jQuery
+	 */
+	_messageContainer: null,
 	
 	/**
 	 * active notification id
@@ -78,8 +90,13 @@ WCF.Notification.Overlay.prototype = {
 	 * Creates the notification overlay.
 	 */
 	_createOverlay: function() {
-		$('<div class="userNotificationContainer"><div id="userNotificationContainer" class="scrollableContainer"><div class="scrollableItems"><div><span class="next">&lt;Spinner&gt;</span></div><div><span class="prev">Details</span></div></div></div></div>').appendTo('body');
+		$('<div class="userNotificationContainer"><div id="userNotificationContainer" class="scrollableContainer"><div class="scrollableItems"><div><p>Loading …</p></div><div><p>Loading …</p></div></div></div></div>').appendTo('body');
 		this._container = $('#userNotificationContainer');
+		var $itemsContainer = this._container.find('div.scrollableItems').click(function(event) { event.stopPropagation(); });
+		this._listContainer = $itemsContainer.children('div:eq(0)');
+		this._messageContainer = $itemsContainer.children('div:eq(1)');
+
+		WCF.CloseOverlayHandler.addCallback('userNotificationContainer', $.proxy(this.close, this));
 		
 		// initialize scrollable API
 		this._container.scrollable({
@@ -139,12 +156,11 @@ WCF.Notification.Overlay.prototype = {
 		this._container.css({ height: $containerDimensions.height + 'px' });
 		
 		// insert html
-		var $messageContainer = this._container.find('div.scrollableItems div:eq(1)');
-		$messageContainer.html($item.data('message')).click($.proxy(this.showList, this));
-		var $messageContainerDimensions = $messageContainer.getDimensions('outer');
+		this._messageContainer.html($item.data('message')).click($.proxy(this.showList, this));
+		var $messageContainerDimensions = this._messageContainer.getDimensions('outer');
 		
 		// bind buttons
-		$messageContainer.find('nav li').each($.proxy(function(index, button) {
+		this._messageContainer.find('nav li').each($.proxy(function(index, button) {
 			var $button = $(button);
 			$button.click($.proxy(function(event) {
 				new WCF.Notification.Action(this, this._api, this._container, this._notificationID, $button);
@@ -170,7 +186,7 @@ WCF.Notification.Overlay.prototype = {
 	showList: function() {
 		this._api.prev();
 		
-		var $listHeight = this._container.find('div.scrollableItems div:eq(0)').getDimensions();
+		var $listHeight = this._listContainer.getDimensions();
 		this._container.animate({
 			height: $listHeight.height + 'px'
 		}, 200);
@@ -189,7 +205,7 @@ WCF.Notification.Overlay.prototype = {
 	 * Closes the overlay.
 	 */
 	close: function() {
-		this._container.hide();
+		this._container.parent().hide();
 		this._isOpen = false;
 	},
 	
@@ -197,7 +213,7 @@ WCF.Notification.Overlay.prototype = {
 	 * Displays the overlay.
 	 */
 	show: function() {
-		this._container.show();
+		this._container.parent().show();
 		this._isOpen = true;
 	}
 };
@@ -224,12 +240,6 @@ WCF.Notification.Action.prototype = {
 	 * @var	jQuery
 	 */
 	_container: null,
-	
-	/**
-	 * item list container
-	 * @var	jQuery
-	 */
-	_itemContainer: null,
 	
 	/**
 	 * loading overlay with spinner
@@ -267,7 +277,6 @@ WCF.Notification.Action.prototype = {
 	init: function(overlay, api, container, notificationID, targetElement) {
 		this._api = api;
 		this._container = container;
-		this._itemContainer = this._container.find('div.scrollableItems div:eq(0)');
 		this._notificationID = notificationID;
 		this._overlay = overlay;
 		this._targetElement = targetElement;
@@ -292,16 +301,16 @@ WCF.Notification.Action.prototype = {
 	 * Removes an item from list. An empty list will result in a notice displayed to user.
 	 */
 	_removeItem: function() {
-		this._itemContainer.find('li').each($.proxy(function(index, item) {
+		this._container._listContainer.children('li').each($.proxy(function(index, item) {
 			var $item = $(item);
 			if ($item.data('notificationID') == this._notificationID) {
 				// remove item itself
 				$item.remove();
 				
 				// remove complete list
-				var $listItems = this._itemContainer.find('li');
+				var $listItems = this._container._listContainer.children('li');
 				if (!$listItems.length) {
-					this._itemContainer.html('<p>' + WCF.Language.get('wcf.user.notification.noNotifications') + '</p>');
+					this._container._listContainer.html('<p>' + WCF.Language.get('wcf.user.notification.noNotifications') + '</p>');
 				}
 				
 				// show list
@@ -388,7 +397,7 @@ WCF.Notification.Loader.prototype = {
 	 * @param	jQuery		jqXHR
 	 */
 	_success: function(data, textStatus, jqXHR) {
-		$('#userNotifications').text(eval(WCF.Language.get('wcf.user.notification.count')));
+		$('#userNotifications').text(data.returnValues.count);
 		
 		if (!data.returnValues.count) {
 			this._container.find('div.scrollableItems div:eq(0)').html('<p>' + WCF.Language.get('wcf.user.notification.noNotifications') + '</p>');
