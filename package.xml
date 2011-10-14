@@ -23,5 +23,7 @@
 		<instruction type="sql">install.sql</instruction>
 		<instruction type="userNotificationType">userNotificationType.xml</instruction>
 		<instruction type="coreObject">coreObject.xml</instruction>
+		<instruction type="template">templates.tar</instruction>
+		<instruction type="language">languages/*</instruction>
 	</instructions>
 </package>

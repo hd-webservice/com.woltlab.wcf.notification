@@ -346,7 +346,7 @@ class UserNotificationHandler extends SingletonFactory {
 			$notifications[] = array(
 				'notificationID' => $event['notificationID'],
 				'label' => $class->getShortOutput(),
-				'message' => $class->getOutput()
+				'message' => $class->getRenderedOutput()
 			);
 		}
 		

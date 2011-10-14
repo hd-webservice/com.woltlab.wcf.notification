@@ -126,6 +126,9 @@ WCF.Notification.Overlay.prototype = {
 	 * @param	object		event
 	 */
 	_showMessage: function(event) {
+		// consume event and discard it
+		event.stopPropagation();
+
 		var $item = $(event.target);
 		
 		// set notification id

@@ -20,7 +20,7 @@ class UserNotificationAction extends AbstractDatabaseObjectAction {
 	protected $className = 'wcf\data\user\notification\UserNotificationEditor';
 	
 	/**
-	 * @todo	validate if user is not a guest
+	 * Does nothing.
 	 */	
 	public function validateLoad() { }
 	
