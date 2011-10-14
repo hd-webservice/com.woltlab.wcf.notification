@@ -40,10 +40,16 @@ abstract class AbstractUserNotificationEvent extends DatabaseObjectDecorator imp
 	protected $additionalData = array();
 	
 	/**
+	 * list of actions for this event
+	 * @var	array<array>
+	 */
+	protected $actions = array();
+	
+	/**
 	 * @see	wcf\system\user\notification\event\IUserNotificationEvent::getActions()
 	 */	
 	public function getActions() {
-		return array();
+		return $this->actions;
 	}
 	
 	/**
@@ -53,6 +59,17 @@ abstract class AbstractUserNotificationEvent extends DatabaseObjectDecorator imp
 		$this->notification = $notification;
 		$this->userNotificationObject = $object;
 		$this->additionalData = $additionalData;
+		
+		$this->addDefaultAction();
+	}
+	
+	protected function addDefaultAction() {
+		$this->actions[] = array(
+			'actionName' => 'markAsConfirmed',
+			'className' => 'wcf\\data\\user\\notification\\UserNotificationAction',
+			'label' => 'OK',
+			'objectID' => $this->notification->notificationID
+		);
 	}
 	
 	/**

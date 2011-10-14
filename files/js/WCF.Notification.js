@@ -273,9 +273,6 @@ WCF.Notification.Action.prototype = {
 		this._targetElement = targetElement;
 		
 		// send ajax request
-		var $parameters = {};
-		$parameters[this._targetElement.data('objectID')] = this._notificationID;
-		
 		new WCF.Action.Proxy({
 			autoSend: true,
 			data: {
@@ -283,7 +280,7 @@ WCF.Notification.Action.prototype = {
 				className: this._targetElement.data('className'),
 				objectIDs: [ this._targetElement.data('objectID') ],
 				parameters: {
-					notificationID: $parameters
+					notificationID: this._notificationID
 				}
 			},
 			init: $.proxy(this._showLoadingOverlay, this),
