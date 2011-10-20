@@ -1,5 +1,6 @@
 <?php
 namespace wcf\system\user\notification;
+use wcf\data\object\type\ObjectTypeCache;
 use wcf\data\user\notification\event\UserNotificationEvent;
 use wcf\data\user\notification\event\UserNotificationEventList;
 use wcf\data\user\notification\event\recipient\UserNotificationEventRecipientList;
@@ -35,6 +36,12 @@ class UserNotificationHandler extends SingletonFactory {
 	protected $availableObjectTypes = array();
 	
 	/**
+	 * list of available events
+	 * @var array
+	 */
+	protected $availableEvents = array();
+	
+	/**
 	 * number of outstanding notifications
 	 * @var integer
 	 */
@@ -44,9 +51,15 @@ class UserNotificationHandler extends SingletonFactory {
 	 * @see wcf\system\SingletonFactory::init()
 	 */
 	protected function init() {
-		// load cache
-		CacheHandler::getInstance()->addResource('user-notification-object-type-'.PACKAGE_ID, WCF_DIR.'cache/cache.user-notification-object-type-'.PACKAGE_ID.'.php', 'wcf\system\cache\builder\UserNotificationObjectTypeCacheBuilder');
-		$this->availableObjectTypes = CacheHandler::getInstance()->get('user-notification-object-type-'.PACKAGE_ID);
+		// get available object types
+		$this->availableObjectTypes = ObjectTypeCache::getInstance()->getObjectTypes('com.woltlab.wcf.notification.objectType');
+		foreach ($this->availableObjectTypes as $typeName => $object) {
+			$this->availableObjectTypes[$typeName] = $object->getProcessor();
+		}
+		
+		// get available events
+		CacheHandler::getInstance()->addResource('user-notification-event-'.PACKAGE_ID, WCF_DIR.'cache/cache.user-notification-event-'.PACKAGE_ID.'.php', 'wcf\system\cache\builder\UserNotificationEventCacheBuilder');
+		$this->availableEvents = CacheHandler::getInstance()->get('user-notification-event-'.PACKAGE_ID);
 	}
 	
 	/**
@@ -60,13 +73,13 @@ class UserNotificationHandler extends SingletonFactory {
 	 */
 	public function fireEvent($eventName, $objectType, IUserNotificationObject $notificationObject, array $recipientIDs, array $additionalData = array()) {
 		// check given object type and event name
-		if (!isset($this->availableObjectTypes[$objectType]['events'][$eventName])) {
-			throw new SystemException("Unknown event '.$objectType.'-.$eventName.' given");
+		if (!isset($this->availableEvents[$objectType][$eventName])) {
+			throw new SystemException("Unknown event ".$objectType."-".$eventName." given".print_r($this->availableEvents, true));
 		}
 		
 		// get objects
-		$objectTypeObject = $this->availableObjectTypes[$objectType]['object'];
-		$event = $this->availableObjectTypes[$objectType]['events'][$eventName];
+		$objectTypeObject = $this->availableObjectTypes[$objectType];
+		$event = $this->availableEvents[$objectType][$eventName];
 		// set object data
 		$event->setObject(new UserNotification(null, array()), $notificationObject, $additionalData);
 		
@@ -121,20 +134,20 @@ class UserNotificationHandler extends SingletonFactory {
 	public function revokeEvents(array $eventNames, $objectType, array $notificationObjects) {
 		// check given object type
 		if (!isset($this->availableObjectTypes[$objectType])) {
-			throw new SystemException("Unknown object type '.$objectType.' given");
+			throw new SystemException("Unknown object type ".$objectType." given");
 		}
 		
 		// get object type object
-		$objectTypeObject = $this->availableObjectTypes[$objectType]['object'];
+		$objectTypeObject = $this->availableObjectTypes[$objectType];
 		
 		// get event ids
 		$eventIDs = array();
 		foreach ($eventNames as $eventName) {
-			if (!isset($this->availableObjectTypes[$objectType]['events'][$eventName])) {
-				throw new SystemException("Unknown event '.$objectType.'-.$eventName.' given");
+			if (!isset($this->availableEvents[$objectType][$eventName])) {
+				throw new SystemException("Unknown event ".$objectType."-".$eventName." given");
 			}
 			
-			$eventIDs[] = $this->availableObjectTypes[$objectType]['events'][$eventName]->eventID;
+			$eventIDs[] = $this->availableEvents[$objectType][$eventName]->eventID;
 		}
 		
 		// get notification object ids
@@ -186,7 +199,7 @@ class UserNotificationHandler extends SingletonFactory {
 		
 		// revoke notifications
 		foreach ($notifications as $notification) {
-			$event = $this->availableObjectTypes[$objectType]['events'][$notification->eventName];
+			$event = $this->availableEvents[$objectType][$notification->eventName];
 			if (isset($recipientIDs[$notification->notificationID])) {
 				foreach ($recipientIDs[$notification->notificationID] as $recipientID) {
 					if (isset($recipients[$recipientID])) {
@@ -270,14 +283,14 @@ class UserNotificationHandler extends SingletonFactory {
 		$conditions->add("notification.packageID IN (?)", array(PackageDependencyHandler::getDependencies()));
 		
 		$sql = "SELECT		notification_to_user.notificationID, notification_event.eventID,
-					notification_object_type.objectType, notification.objectID,
+					object_type.objectType, notification.objectID,
 					notification.additionalData
 			FROM		wcf".WCF_N."_user_notification_to_user notification_to_user,
 					wcf".WCF_N."_user_notification notification
 			LEFT JOIN	wcf".WCF_N."_user_notification_event notification_event
 			ON		(notification_event.eventID = notification.eventID)
-			LEFT JOIN	wcf".WCF_N."_user_notification_object_type notification_object_type
-			ON		(notification_object_type.objectTypeID = notification_event.objectTypeID)
+			LEFT JOIN	wcf".WCF_N."_object_type object_type
+			ON		(object_type.objectTypeID = notification_event.objectTypeID)
 			".$conditions;
 		$statement = WCF::getDB()->prepareStatement($sql, $limit, $offset);
 		$statement->execute($conditions->getParameters());
@@ -289,7 +302,7 @@ class UserNotificationHandler extends SingletonFactory {
 			// cache object types
 			if (!isset($objectTypes[$row['objectType']])) {
 				$objectTypes[$row['objectType']] = array(
-					'objectType' => $this->availableObjectTypes[$row['objectType']]['object'],
+					'objectType' => $this->availableObjectTypes[$row['objectType']],
 					'objectIDs' => array(),
 					'objects' => array()
 				);
@@ -393,7 +406,7 @@ class UserNotificationHandler extends SingletonFactory {
 		
 		$sql = "SELECT	event.eventID
 			FROM	wcf".WCF_N."_user_notification_event event,
-				wcf".WCF_N."_user_notification_object_type object_type
+				wcf".WCF_N."_object_type object_type
 			".$conditions;
 		$statement = WCF::getDB()->prepareStatement($sql);
 		$statement->execute($conditions->getParameters());

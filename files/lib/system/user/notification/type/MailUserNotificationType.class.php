@@ -3,6 +3,7 @@ namespace wcf\system\user\notification\type;
 use wcf\data\user\notification\recipient\UserNotificationRecipient;
 use wcf\data\user\notification\UserNotification;
 use wcf\data\user\UserEditor;
+use wcf\data\object\type\AbstractObjectTypeProcessor;
 use wcf\system\mail\Mail;
 use wcf\system\user\notification\event\IUserNotificationEvent;
 use wcf\util\FileUtil;
@@ -18,7 +19,7 @@ use wcf\util\StringUtil;
  * @subpackage	system.user.notification.type
  * @category 	Community Framework
  */
-class MailUserNotificationType extends AbstractUserNotificationType {        
+class MailUserNotificationType extends AbstractObjectTypeProcessor implements IUserNotificationType {        
 	/**
 	 * @see wcf\system\user\notification\type\IUserNotificationType::send()
 	 */

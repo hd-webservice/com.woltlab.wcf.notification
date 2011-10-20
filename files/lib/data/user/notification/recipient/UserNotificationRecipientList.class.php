@@ -1,6 +1,6 @@
 <?php
 namespace wcf\data\user\notification\recipient;
-use wcf\data\user\notification\type\UserNotificationType;
+use wcf\data\object\type\ObjectType;
 use wcf\data\user\UserList;
 use wcf\data\user\User;
 use wcf\system\database\util\PreparedStatementConditionBuilder;
@@ -36,13 +36,13 @@ class UserNotificationRecipientList extends UserList {
 		
 		$sql = "SELECT		event_to_user.eventID, event_to_user.userID, notification_type.*
 			FROM		wcf".WCF_N."_user_notification_event_notification_type event_to_user
-			LEFT JOIN	wcf".WCF_N."_user_notification_type notification_type
-			ON		(notification_type.notificationTypeID = event_to_user.notificationTypeID)
+			LEFT JOIN	wcf".WCF_N."_object_type notification_type
+			ON		(notification_type.objectTypeID = event_to_user.notificationTypeID)
 			".$conditionBuilder->__toString();
 		$statement = WCF::getDB()->prepareStatement($sql);
 		$statement->execute($conditionBuilder->getParameters());
 		while ($row = $statement->fetchArray()) {
-			$databaseObject = new UserNotificationType(null, $row);
+			$databaseObject = new ObjectType(null, $row);
 			$notificationTypes[$row['userID']][$row['eventID']][] = $databaseObject->getProcessor();
 		}
 

@@ -50,12 +50,17 @@ class UserNotificationEventPackageInstallationPlugin extends AbstractXMLPackageI
 	 */
 	protected function prepareImport(array $data) {
 		// get object type id
-		$sql = "SELECT		notification_object_type.objectTypeID
+		$sql = "SELECT		object_type.objectTypeID
 			FROM		wcf".WCF_N."_package_dependency package_dependency,
-					wcf".WCF_N."_user_notification_object_type notification_object_type
-			WHERE		notification_object_type.packageID = package_dependency.dependency
+					wcf".WCF_N."_object_type object_type
+			WHERE		object_type.packageID = package_dependency.dependency
 					AND package_dependency.packageID = ?
-					AND notification_object_type.objectType = ?
+					AND object_type.objectType = ?
+					AND object_type.definitionID IN (
+						SELECT	definitionID
+						FROM	wcf".WCF_N."_object_type_definition
+						WHERE	definitionName = 'com.woltlab.wcf.notification.objectType'
+					)
 			ORDER BY	package_dependency.priority DESC";
 		$statement = WCF::getDB()->prepareStatement($sql, 1);
 		$statement->execute(array($this->installation->getPackageID(), $data['elements']['objecttype']));
@@ -66,18 +71,23 @@ class UserNotificationEventPackageInstallationPlugin extends AbstractXMLPackageI
 		// get notification type id
 		$defaultNotificationTypeID = null;
 		if (!empty($data['elements']['defaultnotificationtype'])) {
-			$sql = "SELECT		notification_type.notificationTypeID
+			$sql = "SELECT		object_type.objectTypeID
 				FROM		wcf".WCF_N."_package_dependency package_dependency,
-						wcf".WCF_N."_user_notification_type notification_type
-				WHERE		notification_type.packageID = package_dependency.dependency
+						wcf".WCF_N."_object_type object_type
+				WHERE		object_type.packageID = package_dependency.dependency
 						AND package_dependency.packageID = ?
-						AND notification_type.notificationType = ?
+						AND object_type.objectType = ?
+						AND object_type.definitionID IN (
+							SELECT	definitionID
+							FROM	wcf".WCF_N."_object_type_definition
+							WHERE	definitionName = 'com.woltlab.wcf.notification.notificationType'
+						)
 				ORDER BY	package_dependency.priority DESC";
 			$statement = WCF::getDB()->prepareStatement($sql, 1);
 			$statement->execute(array($this->installation->getPackageID(), $data['elements']['defaultnotificationtype']));
 			$row = $statement->fetchArray();
-			if (empty($row['notificationTypeID'])) throw new SystemException("unknown notification type '".$data['elements']['defaultnotificationtype']."' given");
-			$defaultNotificationTypeID = $row['notificationTypeID'];
+			if (empty($row['objectTypeID'])) throw new SystemException("unknown notification type '".$data['elements']['defaultnotificationtype']."' given");
+			$defaultNotificationTypeID = $row['objectTypeID'];
 		}
 		
 		return array(

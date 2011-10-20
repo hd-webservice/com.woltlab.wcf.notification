@@ -1,6 +1,6 @@
 <?php
 namespace wcf\data\user\notification\recipient;
-use wcf\data\user\notification\type\UserNotificationType;
+use wcf\data\object\type\ObjectType;
 use wcf\data\user\User;
 use wcf\data\DatabaseObjectDecorator;
 use wcf\system\WCF;
@@ -34,14 +34,14 @@ class UserNotificationRecipient extends DatabaseObjectDecorator {
 			$this->object->data['notificationTypes'] = array();
 			$sql = "SELECT		event_to_user.eventID, notification_type.*
 				FROM		wcf".WCF_N."_user_notification_event_to_user event_to_user
-				LEFT JOIN	wcf".WCF_N."_user_notification_type notification_type
-				ON		(notification_type.notificationTypeID = event_to_user.notificationTypeID)
+				LEFT JOIN	wcf".WCF_N."_object_type notification_type
+				ON		(notification_type.objectTypeID = event_to_user.notificationTypeID)
 				WHERE		event_to_user.userID = ?
 						AND event_to_user.enabled = ?";
 			$statement = WCF::getDB()->prepareStatement($sql);
 			$statement->execute(array($this->userID, 1));
 			while ($row = $statement->fetchArray()) {
-				$databaseObject = new UserNotificationType(null, $row);
+				$databaseObject = new ObjectType(null, $row);
 				$this->object->data['notificationTypes'][$row['eventID']][] = $databaseObject->getProcessor();
 			}
 		}
