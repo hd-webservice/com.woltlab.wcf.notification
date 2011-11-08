@@ -397,7 +397,7 @@ WCF.Notification.Loader.prototype = {
 	 * @param	jQuery		jqXHR
 	 */
 	_success: function(data, textStatus, jqXHR) {
-		$('#userNotifications').children('span:eq(0)').text(data.returnValues.count);
+		$('#userNotifications span.badge').text(data.returnValues.count);
 		
 		if (!data.returnValues.count) {
 			this._container.find('div.scrollableItems div:eq(0)').html('<p>' + WCF.Language.get('wcf.user.notification.noNotifications') + '</p>');
