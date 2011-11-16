@@ -90,7 +90,7 @@ WCF.Notification.Overlay.prototype = {
 	 * Creates the notification overlay.
 	 */
 	_createOverlay: function() {
-		$('<div class="userNotificationContainer"><div id="userNotificationContainer" class="scrollableContainer"><div class="scrollableItems"><div><p>Loading …</p></div><div><p>Loading …</p></div></div></div></div>').appendTo('body');
+		$('<div class="dropdown userNotificationContainer"><div id="userNotificationContainer" class="scrollableContainer"><div class="scrollableItems"><div><p>Loading É</p></div><div><p>Loading É</p></div></div></div></div>').appendTo($('#userNotifications'));
 		this._container = $('#userNotificationContainer');
 		var $itemsContainer = this._container.find('div.scrollableItems').click(function(event) { event.stopPropagation(); });
 		this._listContainer = $itemsContainer.children('div:eq(0)');
@@ -104,16 +104,6 @@ WCF.Notification.Overlay.prototype = {
 			speed: 200
 		});
 		this._api = this._container.data('scrollable');
-		
-		// move container beneath notification badge
-		var $offsets = $('#userNotifications').getOffsets();
-		var $dimensions = $('#userNotifications').getDimensions('outer');
-		
-		// align overlay with lower left corner
-		this._container.parent().css({
-			left: $offsets.left + 'px',
-			top: ($offsets.top + $dimensions.height) + 'px'
-		});
 		
 		// load notifications
 		this._loadContent();
