@@ -20,6 +20,6 @@ class UserNotificationEventRecipientList extends UserNotificationRecipientList {
 		parent::__construct();
 		
 		$this->sqlConditionJoins = ", wcf".WCF_N."_user_notification_event_to_user event_to_user";
-		$this->getConditionBuilder()->add("event_to_user.userID = user.userID");
+		$this->getConditionBuilder()->add("event_to_user.userID = user_table.userID");
 	}
 }

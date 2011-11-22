@@ -86,7 +86,7 @@ class UserNotificationHandler extends SingletonFactory {
 		// get recipients
 		$recipientList = new UserNotificationEventRecipientList();
 		$recipientList->getConditionBuilder()->add('event_to_user.eventID = ?', array($event->eventID));
-		$recipientList->getConditionBuilder()->add('user.userID IN (?)', array($recipientIDs));
+		$recipientList->getConditionBuilder()->add('user_table.userID IN (?)', array($recipientIDs));
 		$recipientList->readObjects();
 		if (count($recipientList->getObjectIDs())) {
 			// save notification
