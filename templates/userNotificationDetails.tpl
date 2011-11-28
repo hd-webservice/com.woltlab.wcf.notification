@@ -6,23 +6,23 @@
 								- Alexander, 2011-10-14
 *}
 <div class="userNotificationDetails">
-	<hgroup>
+	<header>
 		<div class="row">
 			<div class="avatar">
 				<img src="https://www.woltlab.com/forum/wcf/images/avatars/avatar-8615.png" alt="" />
 			</div>
-			<div>
+			<hgroup>
 				<h1>{$username}</h1>
 				<h2>{@$time|time}</h2>
-			</div>
+			</hgroup>
 		</div>
-	</hgroup>
+	</header>
 	<section>
 		{@$message}
 	</section>
 	{if $buttons|count}
 		<nav>
-			<ul>
+			<ul class="small-buttons"><!-- ToDo: Class-name written wrong to prevent inheritance -->
 				{foreach from=$buttons item=button}
 					<li data-action="{$button['actionName']}" data-class-name="{$button['className']}" data-object-id="{@$button['objectID']}">{$button['label']}</li>
 				{/foreach}
