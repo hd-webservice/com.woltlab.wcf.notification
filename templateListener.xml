@@ -24,7 +24,7 @@
 
 		<templatelistener name="menuItems">
 			<environment>user</environment>
-			<template>userPanel</template>
+			<templatename>userPanel</templatename>
 			<eventname>menuItems</eventname>
 			<templatecode>
 				<![CDATA[<!-- user notifications -->
