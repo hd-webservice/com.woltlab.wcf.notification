@@ -32,9 +32,11 @@ WCF.Notification.Handler.prototype = {
 		if (this._overlay === null) {
 			this._overlay = new WCF.Notification.Overlay();
 		}
+		/*
 		else if (!this._overlay.isOpen()) {
 			this._overlay.show();
 		}
+		*/
 	}
 };
 
@@ -174,6 +176,7 @@ WCF.Notification.Overlay.prototype = {
 	 * Displays list of notification items.
 	 */
 	showList: function() {
+		this.open();
 		this._api.prev();
 		
 		var $listHeight = this._listContainer.getDimensions();
@@ -195,6 +198,10 @@ WCF.Notification.Overlay.prototype = {
 	 * Closes the overlay.
 	 */
 	close: function() {
+		if (!this.isOpen()) {
+			return;
+		}
+
 		this._container.parent().hide();
 		this._isOpen = false;
 	},
@@ -203,6 +210,10 @@ WCF.Notification.Overlay.prototype = {
 	 * Displays the overlay.
 	 */
 	show: function() {
+		if (this.isOpen()) {
+			return;
+		}
+
 		this._container.parent().show();
 		this._isOpen = true;
 	}
