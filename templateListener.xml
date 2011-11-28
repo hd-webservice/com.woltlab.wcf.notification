@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data xmlns="http://www.woltlab.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/templatelistener.xsd">
+	<import>
+		<templatelistener name="javascriptInclude">
+			<environment>user</environment>
+			<templatename>headInclude</templatename>
+			<eventname>javascriptInclude</eventname>
+			<templatecode><![CDATA[<script type="text/javascript" src="{@RELATIVE_WCF_DIR}js/WCF.Notification.js"></script>]]></templatecode>
+		</templatelistener>
+		
+		<templatelistener name="javascriptLanguageImport">
+			<environment>user</environment>
+			<templatename>headInclude</templatename>
+			<eventname>javascriptLanguageImport</eventname>
+			<templatecode><![CDATA[,'wcf.user.notification.count': '{lang}wcf.user.notification.count{/lang}','wcf.user.notification.noNotifications': '{lang}wcf.user.notification.noNotifications{/lang}']]></templatecode>
+		</templatelistener>
+	</import>
+</data>

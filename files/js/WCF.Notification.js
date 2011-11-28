@@ -22,7 +22,7 @@ WCF.Notification.Handler.prototype = {
 	 * Initializes notification handler.
 	 */
 	init: function() {
-		$('#userNotifications').mouseover($.proxy(this._showOverlay, this));
+		$('#userNotifications').click($.proxy(this._showOverlay, this));
 	},
 	
 	/**
@@ -90,7 +90,7 @@ WCF.Notification.Overlay.prototype = {
 	 * Creates the notification overlay.
 	 */
 	_createOverlay: function() {
-		$('<div class="dropdown userNotificationContainer"><div id="userNotificationContainer" class="scrollableContainer"><div class="scrollableItems"><div><p>Loading É</p></div><div><p>Loading É</p></div></div></div></div>').appendTo($('#userNotifications'));
+		$('<div class="dropdown userNotificationContainer"><div id="userNotificationContainer" class="scrollableContainer"><div class="scrollableItems"><div><p>' + WCF.Language.get('wcf.global.loading') + '</p></div><div><p>' + WCF.Language.get('wcf.global.loading') + '</p></div></div></div></div>').appendTo($('#userNotifications'));
 		this._container = $('#userNotificationContainer');
 		var $itemsContainer = this._container.find('div.scrollableItems').click(function(event) { event.stopPropagation(); });
 		this._listContainer = $itemsContainer.children('div:eq(0)');

@@ -22,8 +22,9 @@
 		<instruction type="sql">install.sql</instruction>
 		<instruction type="coreObject">coreObject.xml</instruction>
 		<instruction type="template">templates.tar</instruction>
-		<instruction type="language">languages/*</instruction>
+		<instruction type="language">language/*</instruction>
 		<instruction type="objectTypeDefinition">objectTypeDefinition.xml</instruction>
 		<instruction type="objectType">objectType.xml</instruction>
+		<instruction type="templateListener">templateListener.xml</instruction>
 	</instructions>
 </package>
