@@ -14,5 +14,23 @@
 			<eventname>javascriptLanguageImport</eventname>
 			<templatecode><![CDATA[,'wcf.user.notification.count': '{lang}wcf.user.notification.count{/lang}','wcf.user.notification.noNotifications': '{lang}wcf.user.notification.noNotifications{/lang}']]></templatecode>
 		</templatelistener>
+
+		<templatelistener name="javascriptInit">
+			<environment>user</environment>
+			<templatename>headInclude</templatename>
+			<eventname>javascriptInit</eventname>
+			<templatecode><![CDATA[new WCF.Notification.Handler();]]></templatecode>
+		</templatelistener>
+
+		<templatelistener name="menuItems">
+			<environment>user</environment>
+			<template>userPanel</template>
+			<eventname>menuItems</eventname>
+			<templatecode>
+				<![CDATA[<!-- user notifications -->
+<li id="userNotifications" data-count="{@$__wcf->getUserNotificationHandler()->getNotificationCount()}">
+	<span class="dropdownCaption">{lang}wcf.user.notification.title{/lang} <span class="badge">{#$__wcf->getUserNotificationHandler()->getNotificationCount()}</span></span>
+</li>]]></templatecode>
+		</templatelistener>
 	</import>
 </data>
