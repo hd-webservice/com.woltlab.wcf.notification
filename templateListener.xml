@@ -27,10 +27,10 @@
 			<templatename>userPanel</templatename>
 			<eventname>menuItems</eventname>
 			<templatecode>
-				<![CDATA[<!-- user notifications -->
+				<![CDATA[{if $__wcf->user->userID}<!-- user notifications -->
 <li id="userNotifications" data-count="{@$__wcf->getUserNotificationHandler()->getNotificationCount()}">
 	<span class="dropdownCaption">{lang}wcf.user.notification.title{/lang} <span class="badge">{#$__wcf->getUserNotificationHandler()->getNotificationCount()}</span></span>
-</li>]]></templatecode>
+</li>{/if}]]></templatecode>
 		</templatelistener>
 	</import>
 </data>
