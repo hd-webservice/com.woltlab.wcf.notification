@@ -1,16 +1,9 @@
-{*
-	YES! This IS invalid html, but since the CSS matches this crappy structure,
-	I will continue to use it for testing. Feel free to clean up this messed up
-	markup whenever you want. Just include the template variables (e.g. $username)
-	and you will be fine.
-								- Alexander, 2011-10-14
-*}
 <div class="userNotificationDetails">
 	<header>
 		<div class="row">
-			<div class="avatar">
+			<a href="{link controller='User' id=$response->userID}{/link}" title="{$response->getUserProfile()->username}" class="userAvatar">
 				<img src="https://www.woltlab.com/forum/wcf/images/avatars/avatar-8615.png" alt="" />
-			</div>
+			</a>
 			<hgroup>
 				<h1>{$username}</h1>
 				<h2>{@$time|time}</h2>
